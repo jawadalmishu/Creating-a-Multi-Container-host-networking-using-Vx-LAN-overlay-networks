@@ -36,11 +36,16 @@ A container is a lightweight, standalone, and executable software package that c
 Containers provide a level of abstraction, similar to virtual machines, but with lower overhead and greater efficiency. Unlike virtual machines, which run a complete operating system on top of a hypervisor, containers share the host machine’s operating system kernel. This shared kernel makes containers lightweight, quick to start, and allows for greater resource utilization.
 ## What is docker?
 Docker is an open-source platform that allows you to automate the deployment, scaling, and management of applications using containerization. It provides a way to package software and its dependencies into standardized units called containers.
+
+## Overview of the full diagram below:
+![Full diagram](img/1.png)
 ## Prerequisites:
 - Basic familiarity with Linux and networking concepts.
 - Vagrant, Git and VirtualBox installed on your machine.
 ## Step 1: Setting Up the Environment:
 First you need to install oracle virtual box, git and vagrant. Now create a new folder name vagrant-vms(you can give any name as your wish). Now go to vagrant-vms folder and create two folder Host 1 and Host 2(you can give any name as your wish).
+
+![Folder structure](img/2.png)
 
 I make this two folder because i will create two ubuntu virtual machine in to this two folder and also install docker container into this vm(virtual machine) and communicate between them via VxLAN Tunnel. Yes this is the ultimate goal we will achieve today in this tutorial. So, read carefully, i will describe step by step process.
 
@@ -62,6 +67,8 @@ It will create the ubuntu 18 virtual os in Host 2 folder.
 
 Now open the oracle virtual box, you will see this two os.
 
+![Host 1 and Host 2 running](img/3.png)
+
 So, succcessfully we have created the virtual machines.
 
 Now, for this project we will give static ip address to this two virtual machine Host 1 and Host 2 manually and also we will make sure that two virtual machine should be in the same network. We will give 192.168.33.10 ip address to Host 1 and 192.168.33.11 ip address to Host 2, so that they are in the same network. For this, please type the comman in the two git bash terminal two power off the vm.
@@ -71,6 +78,8 @@ vagrant halt
 ```
 
 Now go to Host 1 folder and you will see the vagrant file there. Open it with Notepad++(any text editor you wish). This script is written in ruby, don’t worry about this script. Go to line number 35. if you don’t see ip address after private network, please add this ip adress.
+
+![Vagrant file](img/4.png)
 
 now remove the ‘#’ sign. It will uncomment this line and will assign ip adress to this vm. Now save this file. Same, you have to go Host 2 folder and uncomment the line number 35 and add ip address 192.168.33.11 and save it.
 
@@ -82,6 +91,8 @@ vagrant up
 ```
 
 So, far we have two host running with the ip address 192.168.33.10 and 192.168.33.11, check in oracle virtual box. Now check this fighure below, here enp0s8 is the interface of the virtual machine. We have attached our ip addresses to this interface. You should remember this interface enp0s8, because we will need this in later.
+
+![host](img/5.png)
 
 - Once the VM is up and running, access the command prompt within the VM by running:
 
@@ -102,6 +113,8 @@ ping 192.168.33.11 -c 5
 ```
 
 You will get output like this.
+
+![Host 1 gitbash](img/6.png)
 
 See, you have successfully ping the Host 2(192.168.33.11). we received 5 packets result as we give in the command. You can also check from host 2 gitbash(ping 192.168.33.10 -c 5).
 
@@ -161,6 +174,8 @@ bdc780133e0e  vxlan-net   bridge    local (This is the bridge and it's id)
 ```
 
 Here we have created a docker bridge and given a static ip 172.18.0.0(under same network) for host 1 and host 2 and named this bridge vxlan-net in both host. For this, host 1 docker bridge and host 2 docker bridge will take ip address 172.18.0.1.
+
+![After creating bridge](img/7.png)
 
 Now type the command.
 
@@ -318,6 +333,9 @@ rtt min/avg/max/mdev = 0.044/0.045/0.047/0.001 ms
 ```
 
 Here we have created docker container which can ping docker bridge. And also we have given static ip(172.18.0.11 for host 1 container, 172.18.0.12 for host 2 container) for each docker container.
+
+![docker container](img/8.png)
+
 ## Step 4: Access Docker Container:
 
 Now access to the running container and try to ping another hosts running container via IP Address. Though hosts can communicate each other, conatiner communication should fail because there is no tunnel or anything to carry the traffic.
@@ -504,6 +522,12 @@ rtt min/avg/max/mdev = 0.601/0.601/0.601/0.000 ms
 
 See the figure, we have got 100% packets transmission from host 1 to host 2.
 
+![ping from Host 1 to Host 2](img/9.png)
+
 See the figure, we have got 100% packets transmission from host 2 to host 1.
 
+![ping from Host 2 to Host 1](img/10.png)
+
 And finally we have successfully ping from one container in one host to another container from second host.
+
+![Full diagram](img/11.png)
